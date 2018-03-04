@@ -1,5 +1,6 @@
 #include <uWS/uWS.h>
 #include <iostream>
+#include <fstream>
 #include "json.hpp"
 #include <math.h>
 #include "ukf.h"
@@ -28,8 +29,14 @@ std::string hasData(std::string s) {
 
 int main()
 {
+  
+  //-->> Delete
+  cout << "Sensor type RADAR: " << MeasurementPackage::RADAR << endl;
+  cout << "Sensor type LIDAR: " << MeasurementPackage::LASER << endl;
+  //--<< Delete
+  
   uWS::Hub h;
-
+  
   // Create a Kalman Filter instance
   UKF ukf;
 
@@ -37,15 +44,39 @@ int main()
   Tools tools;
   vector<VectorXd> estimations;
   vector<VectorXd> ground_truth;
+  vector<VectorXd> nis_measures;
 
-  h.onMessage([&ukf,&tools,&estimations,&ground_truth](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  // Files to store estimation, measurements, ground truth and NIS
+  ofstream out_file;
+  
+  // open file
+  out_file.open ("data_record.txt");
+  
+  // write the file headers
+  out_file << "meas_counter" << "\t";
+  out_file << "sensor_type" << "\t";
+  out_file << "time_stamp" << "\t";
+  out_file << "px_est" << "\t";
+  out_file << "py_est" << "\t";
+  out_file << "vx_est" << "\t";
+  out_file << "vy_est" << "\t";
+  out_file << "px_meas" << "\t";
+  out_file << "py_meas" << "\t";
+  out_file << "px_gt" << "\t";
+  out_file << "py_gt" << "\t";
+  out_file << "vx_gt" << "\t";
+  out_file << "vy_gt" << "\t";
+  out_file << "NIS" << "\n";
+
+  
+  h.onMessage([&ukf,&tools,&estimations,&ground_truth,&out_file](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
-
+    
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
-
+      
       auto s = hasData(std::string(data));
       if (s != "") {
       	
@@ -76,6 +107,9 @@ int main()
           		meas_package.raw_measurements_ << px, py;
           		iss >> timestamp;
           		meas_package.timestamp_ = timestamp;
+          
+
+          
           } else if (sensor_type.compare("R") == 0) {
 
       	  		meas_package.sensor_type_ = MeasurementPackage::RADAR;
@@ -90,7 +124,7 @@ int main()
           		iss >> timestamp;
           		meas_package.timestamp_ = timestamp;
           }
-          float x_gt;
+        float x_gt;
     	  float y_gt;
     	  float vx_gt;
     	  float vy_gt;
@@ -105,7 +139,7 @@ int main()
     	  gt_values(3) = vy_gt;
     	  ground_truth.push_back(gt_values);
           
-          //Call ProcessMeasurment(meas_package) for Kalman filter
+        //Call ProcessMeasurment(meas_package) for Kalman filter
     	  ukf.ProcessMeasurement(meas_package);    	  
 
     	  //Push the current estimated x,y positon from the Kalman filter's state vector
@@ -114,7 +148,7 @@ int main()
 
     	  double p_x = ukf.x_(0);
     	  double p_y = ukf.x_(1);
-    	  double v  = ukf.x_(2);
+    	  double v   = ukf.x_(2);
     	  double yaw = ukf.x_(3);
 
     	  double v1 = cos(yaw)*v;
@@ -126,20 +160,61 @@ int main()
     	  estimate(3) = v2;
     	  
     	  estimations.push_back(estimate);
+          
+        // Calculate RMSE
 
     	  VectorXd RMSE = tools.CalculateRMSE(estimations, ground_truth);
 
           json msgJson;
           msgJson["estimate_x"] = p_x;
           msgJson["estimate_y"] = p_y;
-          msgJson["rmse_x"] =  RMSE(0);
-          msgJson["rmse_y"] =  RMSE(1);
-          msgJson["rmse_vx"] = RMSE(2);
-          msgJson["rmse_vy"] = RMSE(3);
+          msgJson["rmse_x"]     = RMSE(0);
+          msgJson["rmse_y"]     = RMSE(1);
+          msgJson["rmse_vx"]    = RMSE(2);
+          msgJson["rmse_vy"]    = RMSE(3);
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
           // std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 	  
+          //-->>
+          // Print RMSE values
+          ukf.counter_ += 1;
+          cout << "Is file open: " << out_file.is_open() << endl;
+          cout << "Counter: " << ukf.counter_ << endl;
+          cout << "G.Truth: \t" << gt_values.transpose() << endl;
+          cout << "Estimate:\t" << estimate.transpose() << endl;
+          cout << "RMSE:    \t" << RMSE.transpose() << endl;
+          //-->>
+
+          // Write to file:
+          out_file << ukf.counter_ << "\t";
+          out_file << meas_package.sensor_type_ << "\t";
+          out_file << meas_package.timestamp_ << "\t";
+          out_file << estimate(0) << "\t";
+          out_file << estimate(1) << "\t";
+          out_file << estimate(2) << "\t";
+          out_file << estimate(3) << "\t";
+          if(meas_package.sensor_type_ == MeasurementPackage::LASER){
+            out_file << meas_package.raw_measurements_(0) << "\t";
+            out_file << meas_package.raw_measurements_(1) << "\t";
+          }
+          else if(meas_package.sensor_type_ == MeasurementPackage::RADAR){
+            float ro = meas_package.raw_measurements_(0);
+            float theta = meas_package.raw_measurements_(1);
+            out_file << ro * cos(theta) << "\t";
+            out_file << ro * sin(theta) << "\t";
+            
+          }
+          out_file << gt_values(0) << "\t";
+          out_file << gt_values(1) << "\t";
+          out_file << gt_values(2) << "\t";
+          out_file << gt_values(3) << "\t";
+          out_file << ukf.nis_ << "\n";
+          
+          // Close file
+          if(ukf.counter_ >= 499){out_file.close();}
+          cout << "Is file open: " << out_file.is_open() << endl;
+          
         }
       } else {
         
@@ -178,6 +253,7 @@ int main()
   if (h.listen(port))
   {
     std::cout << "Listening to port " << port << std::endl;
+
   }
   else
   {
@@ -185,6 +261,7 @@ int main()
     return -1;
   }
   h.run();
+  
 }
 
 

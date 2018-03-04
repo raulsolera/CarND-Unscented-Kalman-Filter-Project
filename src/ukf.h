@@ -31,11 +31,12 @@ public:
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
 
+  //-->> Delete
   ///* time when the state is true, in us
-  long long time_us_;
+  // long long time_us_;
+  //--<< Delete
   
-  //-->> Added
-  // previous timestamp
+  ///* previous timestamp
   long long previous_timestamp_;
 
   ///* Process noise standard deviation longitudinal acceleration in m/s^2
@@ -71,6 +72,11 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
+  ///* Store NIS for consistency check
+  double nis_;
+  
+  ///* Counter to keep track of number of measurements
+  int counter_;
 
   /**
    * Constructor
