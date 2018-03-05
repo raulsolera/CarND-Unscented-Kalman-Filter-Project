@@ -65,7 +65,7 @@ This algorithm has been implemented in C++ in the source code files provided in 
 - **tools.cpp**: implementation of method CalculateRMSE to calculate the mean square error of the algorithm.
 
 
-## Kalman filter tunning
+## Kalman filter tuning
 
 There are some parameters that have impact in the filter results, in this project we will tune the acceleration and yaw rate dot noise in order to get the smaller RMSE. To do so we will use the consistency check NIS using different parameters with the following sequence:
 
@@ -128,10 +128,6 @@ These combinations result in the following RMSE results that yield the best valu
 Visualization of predicting power of the filter with parameters already tuned and the initial parameter values:
 
 ### Paremeters already tuned
-<img src="./visualizations/report_images/a05yrd05_ini0303_xy_position_comparison.png" alt="XY_POS" style="width: 100px;"/>
-<img src="./visualizations/report_images/a05yrd05_ini0303_independent_x_y_position_comparison.png" alt="IND_XY_POS" style="width: 100px;"/>
-<img src="./visualizations/report_images/a05yrd05_ini0303_independent_vx_vy_position_comparison.png" alt="XY_POS" style="width: 100px;"/>
-
 ![alt text][image9]
 ![alt text][image10]
 ![alt text][image11]
@@ -143,7 +139,7 @@ Visualization of predicting power of the filter with parameters already tuned an
 
 ### Conclusion
 
-Whereas X, Y prediction seems comparable for the initial parameter values, the velocity results show the improvements that can be achieve with an appropriate paremeters tunning up.
+Whereas X, Y prediction seems comparable for the initial parameter values, the velocity results show the improvements that can be achieved with an appropriate parameters tuning up.
 
 
 
