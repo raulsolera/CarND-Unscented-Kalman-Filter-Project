@@ -106,7 +106,7 @@ These combinations result in the following RMSE results that yield the best valu
 #### Best result
 | Parameters acc / yrd noise (px/py/v ini) |     px     |     py     |     vx    |     vy    |
 |------------------------------------------|:----------:|:----------:|:---------:|:---------:|
-| **0.5/0.5 (0.3/0.3/0)**                  | **0.0610** | **0.0850** | **0.329** | **0.209** |
+| 0.5/0.5 (0.3/0.3/0)                      |     0.0610 |     0.0850 |     0.329 |     0.209 |
 
 #### Overall results
 | Parameters acc / yrd noise (px/py/v ini) |     px     |     py     |     vx    |     vy    |
