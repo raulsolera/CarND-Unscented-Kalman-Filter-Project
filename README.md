@@ -128,14 +128,14 @@ These combinations result in the following RMSE results that yield the best valu
 Visualization of predicting power of the filter with parameters already tuned and the initial parameter values:
 
 ### Paremeters already tuned
-![alt text][image9 =100x100]
-![alt text][image10 =100x100]
-![alt text][image11 =100x100]
+![alt text][image9]{ width: 200px; }
+![alt text][image10]{ width: 200px; }
+![alt text][image11]{ width: 200px; }
 
 ### Initial Paremeter values
-![alt text][image12 =100x100]
-![alt text][image13 =100x100]
-![alt text][image14 =100x100]
+![alt text][image12 =100x100]{ width: 200px; }
+![alt text][image13 =100x100]{ width: 200px; }
+![alt text][image14 =100x100]{ width: 200px; }
 
 ### Conclusion
 
